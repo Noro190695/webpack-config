@@ -1,7 +1,12 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlMinimizerPlugin = require("html-minimizer-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const JsonMinimizerPlugin = require("json-minimizer-webpack-plugin");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
 
 const mode = process.env.NODE_ENV;
 const PORT = 3000;
@@ -18,7 +23,12 @@ const plugins = (param) => {
   const pluginsContainer = [];
 
   if (param.clean) {
-    pluginsContainer.push(new CleanWebpackPlugin());
+    pluginsContainer.push(new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: [
+        '**/*',
+        '!assets*'
+    ],
+    }));
   }
 
   if (param.html) {
@@ -44,11 +54,26 @@ const styleLoader = (isCssFile) => {
 }
 module.exports = {
   mode: mode,
-  entry: './src/script/index.js',
+  entry: {
+    index: './src/script/index.js',
+    'index-ts': './src/script/index.ts'
+  },
   
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: mode === 'development' ? 'script/[name].js':'script/[name].[hash].js',
+  },
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js', '.jsx', '.json' ],
+  },
+  optimization: {
+    minimize: mode === 'development'? false: true,
+    minimizer: [
+      new JsonMinimizerPlugin(),
+      new CssMinimizerPlugin(),
+      new HtmlMinimizerPlugin(),
+      new UglifyJsPlugin()
+    ],
   },
   plugins: plugins(config.plugins),
   devServer: {
@@ -57,6 +82,11 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
