@@ -1,0 +1,23 @@
+{
+  "name": "webpack-config",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Noro190695/webpack-config.git"
+  },
+  "keywords": [
+    "webpack",
+    "config"
+  ],
+  "author": "Norayr Kokhlikyan <koxlikyan1995@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Noro190695/webpack-config/issues"
+  },
+  "homepage": "https://github.com/Noro190695/webpack-config#readme"
+}
