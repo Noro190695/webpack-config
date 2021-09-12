@@ -7,10 +7,10 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const JsonMinimizerPlugin = require("json-minimizer-webpack-plugin");
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
-
+const dev = 'development';
 const mode = process.env.NODE_ENV;
 const PORT = 3000;
-
+const language = 'ts'
 const config = {
   plugins: {
     clean: true,
@@ -54,26 +54,38 @@ const styleLoader = (isCssFile) => {
 }
 module.exports = {
   mode: mode,
+  devtool: mode === dev ? 'eval-source-map':'',
   entry: {
-    index: './src/script/index.js',
-    'index-ts': './src/script/index.ts'
+    index: language === 'js'? ['@babel/polyfill', './src/script/index.js'] :  './src/script/index.ts',
   },
   
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: mode === 'development' ? 'script/[name].js':'script/[name].[hash].js',
+    filename: mode === dev  ? 'js/[name].js':'js/[name].[hash].js',
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js', '.jsx', '.json' ],
+    extensions: [ '.ts', '.tsx', '.script', '.js', '.jsx', '.json' ],
   },
   optimization: {
-    minimize: mode === 'development'? false: true,
+    minimize: mode === dev ? false: true,
     minimizer: [
       new JsonMinimizerPlugin(),
       new CssMinimizerPlugin(),
       new HtmlMinimizerPlugin(),
       new UglifyJsPlugin()
     ],
+    splitChunks:{
+      // chunks: "all"
+      cacheGroups: {
+        commons: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+
+        }
+      }
+    }
+    
   },
   plugins: plugins(config.plugins),
   devServer: {
@@ -82,11 +94,6 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
@@ -102,11 +109,25 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
+        test: /\.m?js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader"
+        }
+      },
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader"
+        }
+      },
+      {
         test: /\.(png|jpe?g|gif|svg)$/i,
         loader: 'file-loader',
         options: {
           name(resourcePath, resourceQuery) {
-            if (mode === 'development') {
+            if (mode === dev ) {
               return 'img/[ext]/[name].[ext]';
             }
             return 'img/[ext]/[hash].[ext]';

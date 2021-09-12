@@ -1,1 +1,4 @@
-const num: number = 15;
+import {test} from './test';
+
+
+console.log(test)
