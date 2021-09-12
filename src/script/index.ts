@@ -1,4 +1,3 @@
-import {test} from './test';
+import '../style/style.scss'
 
-
-console.log(test)
+let a  = 1112;

@@ -6,23 +6,18 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const JsonMinimizerPlugin = require("json-minimizer-webpack-plugin");
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const env = require('dotenv').config().parsed
 
-const dev = 'development';
+
+const dev = env.MODE;
 const mode = process.env.NODE_ENV;
 const PORT = 3000;
-const language = 'ts'
-const config = {
-  plugins: {
-    clean: true,
-    html: true,
-    style: true
-  }
-}
+
 
 const plugins = (param) => {
   const pluginsContainer = [];
 
-  if (param.clean) {
+  if (Boolean(param.CLEAN)) {
     pluginsContainer.push(new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: [
         '**/*',
@@ -31,11 +26,11 @@ const plugins = (param) => {
     }));
   }
 
-  if (param.html) {
+  if (Boolean(param.HTML)) {
     pluginsContainer.push(new HtmlWebpackPlugin());
   }
 
-  if (param.style) {
+  if (Boolean(param.STYLE)) {
     pluginsContainer.push(new MiniCssExtractPlugin({
       filename: "style/[name].css",
       chunkFilename: "[style/[id].css",
@@ -52,11 +47,12 @@ const styleLoader = (isCssFile) => {
     return 'style-loader';
   }
 }
+
 module.exports = {
   mode: mode,
   devtool: mode === dev ? 'eval-source-map':'',
   entry: {
-    index: language === 'js'? ['@babel/polyfill', './src/script/index.js'] :  './src/script/index.ts',
+    index: env.LANGUAGE === 'js'? ['@babel/polyfill', './src/script/index.ts'] :  './src/script/index.ts',
   },
   
   output: {
@@ -81,13 +77,12 @@ module.exports = {
           test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
           chunks: 'all',
-
         }
       }
     }
     
   },
-  plugins: plugins(config.plugins),
+  plugins: plugins(env),
   devServer: {
     allowedHosts: 'all',
     port: PORT
@@ -102,21 +97,14 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         use: [
-          styleLoader(config.plugins.style),
+          styleLoader(!env.STYLE),
           'css-loader',
           'sass-loader',
         ],
         exclude: /node_modules/,
       },
       {
-        test: /\.m?js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
-      },
-      {
-        test: /\.ts$/,
+        test: /\.m?js|\.ts$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader"
