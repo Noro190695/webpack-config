@@ -57,7 +57,7 @@ module.exports = {
   
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: mode === dev  ? 'js/[name].js':'js/[name].[hash].js',
+    filename: mode === dev  ? 'script/[name].js':'script/[name].[hash].js',
   },
   resolve: {
     extensions: [ '.ts', '.tsx', '.script', '.js', '.jsx', '.json' ],
